@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+
+Resources:
+   OcrserviceLambdaApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT,FETCH'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        
+   LambdaTextRactOCR:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs14.x
+      MemorySize: 128
+      Timeout:  120
+      Policies:
+        - AmazonTextractFullAccess
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - "textract:*"
+              Resource: '*'
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: '/OCR'
+            Method: post
+            RestApiId:
+             Ref: OcrserviceLambdaApi
+      
